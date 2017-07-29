@@ -45,21 +45,22 @@ app.use((req, res, next) => {
 
   if (!req.session.word) {
 
-    req.session.word = words[Math.floor(Math.random()* words.length)];
-    req.session.wordArray = (req.session.word).split("");
+    req.session.word = words[Math.floor(Math.random() * words.length)];   //selects random word from library
+    req.session.wordArray = (req.session.word).split("");                 //splits random word into array
     req.session.emptyArray = [];
     for (var i = 0; i < req.session.word.length; i++) {
-      req.session.emptyArray.push("_");
+      req.session.emptyArray.push("_");                                   //creates empty array of same length as word
     }
   }
-
   console.log(req.session);
   next();
-
 });
 
+let countdown = 8;
+let usedArray = [];
 
-// configure the webroot
+
+// configure the webroot and set emptyArray of word.length
 app.get('/', function(req, res) {
 
   res.render('home', {
@@ -69,20 +70,48 @@ app.get('/', function(req, res) {
 });
 
 
-
-app.post("/charGuess", function(req,res) {
+app.post("/charGuess", function(req, res) {
 
   let charGuess = req.body
-  req.checkBody('character', 'Name is required').notEmpty();
-  req.assert('character', 'Enter only 1 character').len(0, 1);
 
-  req.getValidationResult().then(function(result) {
-  
+  req.checkBody('character', 'Enter 1 character').notEmpty().len(1, 1);
+
+  req.getValidationResult().then(result => {
+    let errors = result.useFirstErrorOnly().array();
+    if (errors === true) {
+      res.render('home', {
+        emptyArray: req.session.emptyArray,
+        errors:errors
+      });
+      res.redirect('/')
+    } else {
+
+      for (var i = 0; i < req.session.wordArray.length; i++) {
+        if (charGuess.character === req.session.wordArray[i]) {
+          req.session.emptyArray.splice(i , 1 , charGuess.character);
+          res.render('home',{
+            emptyArray:req.session.emptyArray,
+          });
+          usedArray.push(charGuess.character)
+      
+        } else {
+          usedArray.push(charGuess.character)
+          countdown -=1;
+          console.log(countdown)
+
+        }
+      }
+
+      // res.render('home', {
+      //   emptyArray:req.session.emptyArray,
+      //   // errors:errors
+      // })
+    }
+
+
   });
 
-  });
-
-
+});
 
 
 

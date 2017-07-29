@@ -10,7 +10,7 @@
 <body>
   <header>
     <h1>Mystery Word</h1>
-    <h3>You have guesses left</h3>
+    <h3>You have guesses {{countdown}} left</h3>
   </header>
   <main>
 
@@ -22,15 +22,18 @@
         {{/emptyArray}}
       </div>
 
-
-
-
+      <div class="errors">
+        {{#errors}}{{msg}}{{/errors}}
+      </div>
 
 
       <form class="charGuess" action="/charGuess" method="post">
         <input type="text" name="character" value="" placeholder="Guess A Single Letter">
         <button>Submit</button>
       </form>
+
+
+
 
   </main>
 </body>
