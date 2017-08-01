@@ -10,7 +10,7 @@
 <body>
   <header>
     <h1>Mystery Word</h1>
-    <h3>You have guesses {{countdown}} left</h3>
+    <h3>You have guesses {{remTurns}} left</h3>
   </header>
   <main>
 
@@ -33,9 +33,9 @@
       </form>
 
       <div class="usedArray">
-        {{#usedArray}}
+        {{#spentCharArray}}
           {{.}}
-        {{/usedArray}}
+        {{/spentCharArray}}
       </div>
 
 

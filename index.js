@@ -40,38 +40,36 @@ app.use(bodyParser.urlencoded({
 // other methods to the req.
 app.use(expressValidator());
 
-
 // this middleware creates a default session
-app.use((req, res, next) => {
-  if (!req.session.word) {
-    req.session.word = [];
-  }
-  console.log(req.session);
-  next();
-});
-
+function newSesh() {
+  app.use((req, res, next) => {
+    if (!req.session.word) {
+      req.session.word = [];
+    }
+    console.log(req.session);
+    next();
+  });
+};
 
 
 word = words[Math.floor(Math.random() * words.length)]; //selects random word from library
 wordArray = (word).split(""); //splits random word into array
-emptyArray = [];
+emptyArray = []; //empty array for initial setup
 for (var i = 0; i < word.length; i++) {
   emptyArray.push("_"); //creates empty array of same length as word
 }
-
+spentCharArray = [];
+remTurns = 8;
+console.log(wordArray);
 
 
 // configure the webroot and set emptyArray of word.length
 app.get('/', function(req, res) {
-  req.session.word = emptyArray;
+  req.session.word = wordArray;
   res.render('home', {
     emptyArray: emptyArray
   })
 });
-
-
-
-
 
 
 app.post("/charGuess", function(req, res) {
@@ -79,37 +77,54 @@ app.post("/charGuess", function(req, res) {
   let charGuess = req.body
 
   req.checkBody('character', 'Please enter a character').notEmpty();
-  req.checkBody('character', 'Only 1 character allowed').len(1,1);
+  req.checkBody('character', 'Only 1 character allowed').len(1, 1);
 
-  let errors = req.validationErrors();
+  req.getValidationResult()
 
-    if (errors) {
-      // there were errors, report them
+    .then((result) => {
+      // do something with the validation result
+      let errors = result.array();
       console.log(errors);
-
       res.render('home', {
+        emptyArray: emptyArray,
         errors: errors,
+        spentCharArray: spentCharArray
       });
-    } else {
-      console.log(data);
-      for (var i = 0; i < charGuess.length; i++) {
-        if (charGuess.character) {
-          emptyArray.push(data[i]);
-          res.redirect('/');
-        } else {
-          res.redirect('/login');
+    })
+
+    // .then(()=>{
+    //   for (var i = 0; i < spentCharArray.length; i++) {
+    //     if (charGuess.character === spentCharArray[i]) {
+    //       spentCharArray[i]
+    //     }
+    //
+    //   }
+    // })
+
+    .then(() => {
+      for (var i = 0; i < wordArray.length; i++) {
+        if (charGuess.character === wordArray[i]) {
+          emptyArray.splice(i, 1, charGuess.character);
+          spentCharArray.push(charGuess.character);
+
+          console.log(emptyArray);
         }
       }
-    }
+    })
+
+  // .then(()=>{
+  //
+  //
+  //
+  //
+  //
+  // })
 
 
-//   req.getValidationResult().then(function(result) {
-//   // do something with the validation result
-// });
 
 
-  });
 
+});
 
 
 
