@@ -60,7 +60,7 @@ for (var i = 0; i < word.length; i++) {
 }
 spentCharArray = [];
 remTurns = 8;
-
+console.log(wordArray);
 
 // configure the webroot and set emptyArray of word.length
 app.get('/', function(req, res) {
@@ -77,20 +77,32 @@ app.post("/charGuess", function(req, res) {
 
   req.checkBody('character', '- Please enter a character ').notEmpty();
   req.checkBody('character', '- Only 1 character allowed').len(1, 1);
+  req.checkBody()
 
   req.getValidationResult()
 
     .then((result) => {
-      // do something with the validation result
-      let errors = result.array();
-      console.log(errors);
-      res.render('home', {
-        emptyArray: emptyArray,
-        errors: errors,
-        spentCharArray: spentCharArray,
-        remTurns: remTurns
-      });
+      // do something with the validation result - throw error method:
+      if (!result.isEmpty()) {
+        throw new Error(result.array().map((item) => item.msg).join(' - '));
+      } else if (spentCharArray.includes(character)) {
+        throw new Error('Letter has already been guessed');
+      } else {
+        console.log('No errors')
+      }
     })
+
+    //   without throwing errors:
+
+    //   let errors = result.array();
+    //   console.log(errors);
+    //   res.render('home', {
+    //     emptyArray: emptyArray,
+    //     errors: errors,
+    //     spentCharArray: spentCharArray,
+    //     remTurns: remTurns
+    //   });
+    // })
 
     .then(() => {
       //if guessed letter is present run this block:
@@ -104,10 +116,9 @@ app.post("/charGuess", function(req, res) {
               console.log(emptyArray);
             }
           }
-          if (word.toString() === emptyArray.toString()) {
-            console.log(word);
-            console.log(emptyArray)
-            console.log('win');
+        //setup link to winpage
+          if (wordArray.join("").toString() === emptyArray.join("").toString()) {
+            console.log('check win');
             res.render('results', {
               word: word
             });
@@ -118,12 +129,21 @@ app.post("/charGuess", function(req, res) {
           remTurns--;
           spentCharArray.push(character);
           if (remTurns === 0) {
-            console.log('loss');
+            console.log('check loss');
             res.render('results', {
               word: word
             })
           }
         }
+    })
+
+    .catch((error)=>{
+      res.render('home', {
+        emptyArray: emptyArray,
+        errors: errors,
+        spentCharArray: spentCharArray,
+        remTurns: remTurns
+      });
     })
 });
 
