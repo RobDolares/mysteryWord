@@ -42,13 +42,13 @@ app.use(expressValidator());
 
 // this middleware creates a default session
 
-  app.use((req, res, next) => {
-    if (!req.session.word) {
-      req.session.word = [];
-    }
-    console.log(req.session);
-    next();
-  });
+app.use((req, res, next) => {
+  if (!req.session.word) {
+    req.session.word = [];
+  }
+  console.log(req.session);
+  next();
+});
 
 
 
@@ -77,15 +77,15 @@ app.post("/charGuess", function(req, res) {
 
   req.checkBody('character', '- Please enter a character ').notEmpty();
   req.checkBody('character', '- Only 1 character allowed').len(1, 1);
-  req.checkBody()
 
   req.getValidationResult()
 
     .then((result) => {
-      // do something with the validation result - throw error method:
-      if (!result.isEmpty()) {
-        throw new Error(result.array().map((item) => item.msg).join(' - '));
-      } else if (spentCharArray.includes(character)) {
+      // do something with the validation result -
+        // throw error method:
+    if (!result.isEmpty()) {
+      throw new Error(result.array().map((item) => item.msg).join(' - '));
+        } else if (spentCharArray.includes(character)) {
         throw new Error('Letter has already been guessed');
       } else {
         console.log('No errors')
@@ -106,45 +106,50 @@ app.post("/charGuess", function(req, res) {
 
     .then(() => {
       //if guessed letter is present run this block:
-        if (wordArray.includes(character) && character !== "") {
-          if (!spentCharArray.includes(character)) {
-            spentCharArray.push(character);
-          }
-          for (var i = 0; i < wordArray.length; i++) {
-            if (character === wordArray[i]) {
-              emptyArray.splice(i, 1, character);
-              console.log(emptyArray);
-            }
-          }
-        //setup link to winpage
-          if (wordArray.join("").toString() === emptyArray.join("").toString()) {
-            console.log('check win');
-            res.render('results', {
-              word: word
-            });
-          }
-        }
-        //if guessed letter is not present
-         else {
-          remTurns--;
+      if (wordArray.includes(character)) {
+        if (!spentCharArray.includes(character)) {
           spentCharArray.push(character);
-          if (remTurns === 0) {
-            console.log('check loss');
-            res.render('results', {
-              word: word
-            })
+        }
+        for (var i = 0; i < wordArray.length; i++) {
+          if (character === wordArray[i]) {
+            emptyArray.splice(i, 1, character);
+            console.log(emptyArray);
           }
         }
-    })
-
-    .catch((error)=>{
+        //setup link to winpage
+        if (wordArray.join("").toString() === emptyArray.join("").toString()) {
+          res.render('winner', {
+            word: word
+          });
+        }
+      }
+      //if guessed letter is not present
+      else {
+        remTurns--;
+        spentCharArray.push(character);
+        if (remTurns === 0) {
+          res.render('loser', {
+            word: word
+          })
+        }
+      }
       res.render('home', {
         emptyArray: emptyArray,
-        errors: errors,
         spentCharArray: spentCharArray,
         remTurns: remTurns
       });
     })
+
+    .catch((error) => {
+      res.render('home', {
+        emptyArray: emptyArray,
+        error: error,
+        spentCharArray: spentCharArray,
+        remTurns: remTurns
+      });
+    })
+
+
 });
 
 app.listen(3000);

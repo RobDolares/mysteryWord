@@ -23,7 +23,7 @@
       </div>
 
       <div class="errors">
-        {{errors}}
+        {{error}}
       </div>
 
 
@@ -33,7 +33,9 @@
       </form>
 
       <div class="usedArray">
-        {{spentCharArray}}
+        {{#spentCharArray}}
+        {{.}}
+        {{/spentCharArray}}
       </div>
 
 
