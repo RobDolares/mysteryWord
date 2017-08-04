@@ -41,7 +41,7 @@ app.use(bodyParser.urlencoded({
 app.use(expressValidator());
 
 // this middleware creates a default session
-function newSesh() {
+
   app.use((req, res, next) => {
     if (!req.session.word) {
       req.session.word = [];
@@ -49,35 +49,34 @@ function newSesh() {
     console.log(req.session);
     next();
   });
-};
+
 
 
 word = words[Math.floor(Math.random() * words.length)]; //selects random word from library
-wordArray = (word).split(""); //splits random word into array
+wordArray = (word.toUpperCase()).split(""); //splits random word into array
 emptyArray = []; //empty array for initial setup
 for (var i = 0; i < word.length; i++) {
   emptyArray.push("_"); //creates empty array of same length as word
 }
 spentCharArray = [];
 remTurns = 8;
-console.log(wordArray);
 
 
 // configure the webroot and set emptyArray of word.length
 app.get('/', function(req, res) {
   req.session.word = wordArray;
   res.render('home', {
-    emptyArray: emptyArray
+    emptyArray: emptyArray,
+    remTurns: remTurns
   })
 });
 
-
 app.post("/charGuess", function(req, res) {
 
-  let charGuess = req.body
+  let character = req.body.character.toUpperCase();
 
-  req.checkBody('character', 'Please enter a character').notEmpty();
-  req.checkBody('character', 'Only 1 character allowed').len(1, 1);
+  req.checkBody('character', '- Please enter a character ').notEmpty();
+  req.checkBody('character', '- Only 1 character allowed').len(1, 1);
 
   req.getValidationResult()
 
@@ -88,50 +87,44 @@ app.post("/charGuess", function(req, res) {
       res.render('home', {
         emptyArray: emptyArray,
         errors: errors,
-        spentCharArray: spentCharArray
+        spentCharArray: spentCharArray,
+        remTurns: remTurns
       });
     })
 
-    // .then(()=>{
-    //   for (var i = 0; i < spentCharArray.length; i++) {
-    //     if (charGuess.character === spentCharArray[i]) {
-    //       spentCharArray[i]
-    //     }
-    //
-    //   }
-    // })
-
     .then(() => {
-      for (var i = 0; i < wordArray.length; i++) {
-        if (charGuess.character === wordArray[i]) {
-          emptyArray.splice(i, 1, charGuess.character);
-          spentCharArray.push(charGuess.character);
-
-          console.log(emptyArray);
+      //if guessed letter is present run this block:
+        if (wordArray.includes(character) && character !== "") {
+          if (!spentCharArray.includes(character)) {
+            spentCharArray.push(character);
+          }
+          for (var i = 0; i < wordArray.length; i++) {
+            if (character === wordArray[i]) {
+              emptyArray.splice(i, 1, character);
+              console.log(emptyArray);
+            }
+          }
+          if (word.toString() === emptyArray.toString()) {
+            console.log(word);
+            console.log(emptyArray)
+            console.log('win');
+            res.render('results', {
+              word: word
+            });
+          }
         }
-      }
+        //if guessed letter is not present
+         else {
+          remTurns--;
+          spentCharArray.push(character);
+          if (remTurns === 0) {
+            console.log('loss');
+            res.render('results', {
+              word: word
+            })
+          }
+        }
     })
-
-  // .then(()=>{
-  //
-  //
-  //
-  //
-  //
-  // })
-
-
-
-
-
 });
-
-
-
-
-
-
-
-
 
 app.listen(3000);

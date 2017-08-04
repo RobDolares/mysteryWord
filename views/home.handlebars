@@ -10,7 +10,7 @@
 <body>
   <header>
     <h1>Mystery Word</h1>
-    <h3>You have guesses {{remTurns}} left</h3>
+    <h3>You have guesses {{#remTurns}}{{.}}{{/remTurns}} left</h3>
   </header>
   <main>
 
@@ -34,9 +34,12 @@
 
       <div class="usedArray">
         {{#spentCharArray}}
-          {{.}}
+        {{.}}
         {{/spentCharArray}}
       </div>
+
+
+      <button type="button" name="button" onclick="newSesh()">Reset</button>
 
 
 
