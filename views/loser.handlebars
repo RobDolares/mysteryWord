@@ -6,7 +6,9 @@
   </head>
   <body>
     <h1>You Lost</h1>
-    {{word}}
-
+    <h3>The word was: {{word}}</h3>
+    <form class="reset" action="/reset" method="post">
+      <button name="button">Try Again</button>
+    </form>
   </body>
 </html>

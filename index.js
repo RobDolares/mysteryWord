@@ -50,21 +50,32 @@ app.use((req, res, next) => {
   next();
 });
 
+let word;
+let wordArray;
+let emptyArray = [];//empty array for initial setup
+let spentCharArray = [];
+let remTurns = 8;
 
-
-word = words[Math.floor(Math.random() * words.length)]; //selects random word from library
-wordArray = (word.toUpperCase()).split(""); //splits random word into array
-emptyArray = []; //empty array for initial setup
-for (var i = 0; i < word.length; i++) {
-  emptyArray.push("_"); //creates empty array of same length as word
-}
-spentCharArray = [];
-remTurns = 8;
-console.log(wordArray);
+// word = words[Math.floor(Math.random() * words.length)]; //selects random word from library
+// let wordArray = (word.toUpperCase()).split(""); //splits random word into array
+// let emptyArray = []; //empty array for initial setup
+// for (var i = 0; i < word.length; i++) {
+//   emptyArray.push("_"); //creates empty array of same length as word
+// }
+// let spentCharArray = [];
+// console.log(wordArray);
 
 // configure the webroot and set emptyArray of word.length
 app.get('/', function(req, res) {
-  req.session.word = wordArray;
+  if (req.session.word.length === 0) {
+    word = words[Math.floor(Math.random() * words.length)]; //selects random word from library
+    wordArray = (word.toUpperCase()).split(""); //splits random word into array
+    req.session.word = wordArray;
+    for (var i = 0; i < word.length; i++) {
+      emptyArray.push("_"); //creates empty array of same length as word
+    }
+  }
+
   res.render('home', {
     emptyArray: emptyArray,
     remTurns: remTurns
@@ -92,18 +103,6 @@ app.post("/charGuess", function(req, res) {
       }
     })
 
-    //   without throwing errors:
-
-    //   let errors = result.array();
-    //   console.log(errors);
-    //   res.render('home', {
-    //     emptyArray: emptyArray,
-    //     errors: errors,
-    //     spentCharArray: spentCharArray,
-    //     remTurns: remTurns
-    //   });
-    // })
-
     .then(() => {
       //if guessed letter is present run this block:
       if (wordArray.includes(character)) {
@@ -118,7 +117,8 @@ app.post("/charGuess", function(req, res) {
         }
         //setup link to winpage
         if (wordArray.join("").toString() === emptyArray.join("").toString()) {
-          res.render('winner', {
+          console.log('check win');
+           return res.render('winner', {
             word: word
           });
         }
@@ -128,7 +128,8 @@ app.post("/charGuess", function(req, res) {
         remTurns--;
         spentCharArray.push(character);
         if (remTurns === 0) {
-          res.render('loser', {
+          console.log('check loss');
+          return res.render('loser', {
             word: word
           })
         }
@@ -148,8 +149,15 @@ app.post("/charGuess", function(req, res) {
         remTurns: remTurns
       });
     })
-
-
 });
 
-app.listen(3000);
+app.post('/reset', (req,res)=>{
+  req.session.word = [];
+    emptyArray = [];
+    spentCharArray = [];
+    remTurns = 8;
+    res.redirect('/');
+})
+
+
+app.listen(3000, () => console.log('up and running'));

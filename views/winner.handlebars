@@ -5,8 +5,10 @@
     <title>Winner</title>
   </head>
   <body>
-    <h1>Yay You won!</h1>
-    {{word}}
-
+    <h1>Congratulations, You won!</h1>
+    <h3>{{word}}</h3>
+    <form class="reset" action="/reset" method="post">
+      <button name="button">Try Again</button>
+    </form>
   </body>
 </html>
