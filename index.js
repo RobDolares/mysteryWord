@@ -117,7 +117,6 @@ app.post("/charGuess", function(req, res) {
         }
         //setup link to winpage
         if (wordArray.join("").toString() === emptyArray.join("").toString()) {
-          console.log('check win');
            return res.render('winner', {
             word: word
           });
@@ -128,7 +127,6 @@ app.post("/charGuess", function(req, res) {
         remTurns--;
         spentCharArray.push(character);
         if (remTurns === 0) {
-          console.log('check loss');
           return res.render('loser', {
             word: word
           })
